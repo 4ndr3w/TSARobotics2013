@@ -72,8 +72,8 @@ void setup() {
   Ethernet.begin(mac,ip);
   UDP.begin(8888);
   Serial.begin(9600);
-  pinMode(LIFT_LIMIT_UP, INPUT);
-  pinMode(LIFT_LIMIT_DOWN, INPUT);
+  pinMode(LIFT_LIMIT_UP, INPUT_PULLUP);
+  pinMode(LIFT_LIMIT_DOWN, INPUT_PULLUP);
 }
 
 
