@@ -39,9 +39,7 @@ struct ControlState
 void doCommunication()
 {
   if ( UDP.parsePacket() )
-  {
-    IPAddress source = UDP.remoteIP();
-    
+  {    
     char packetBuffer[UDP_TX_PACKET_MAX_SIZE];
     UDP.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
     controlState.leftDrive = packetBuffer[0];
@@ -49,9 +47,6 @@ void doCommunication()
     controlState.collectorState = packetBuffer[2];
     controlState.liftState = packetBuffer[3];
     timeoutAt = millis()+500;
-    UDP.beginPacket(source, 8888);
-    UDP.write('c');
-    UDP.endPacket();
   }
   
   if ( millis() > timeoutAt )
