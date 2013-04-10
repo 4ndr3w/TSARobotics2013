@@ -13,11 +13,11 @@
 #define LIFT_RUN_DOWN 2
 
 
-Victor leftDrive(4);
-Victor rightDrive(5);
+Servo leftDrive;
+Servo rightDrive;
 
-Spike collector(6,7);
-Spike lift(8,9);
+//Spike collector(6,7);
+//Spike lift(8,9);
 
 
 byte mac[] = {  
@@ -35,6 +35,12 @@ struct ControlState
   byte liftState;
 } controlState;
 
+
+int calcPWMValue(byte value)
+{
+  float v = ((float)value*(500.0f/127.0f))+1000.0f;
+  return int(floor(v));
+}
 
 void doCommunication()
 {
@@ -59,21 +65,25 @@ void doCommunication()
 
 void drivetrainUpdate()
 {
-  leftDrive.set(controlState.leftDrive);
-  rightDrive.set(controlState.rightDrive);
+  leftDrive.writeMicroseconds(calcPWMValue(controlState.leftDrive));
+  rightDrive.writeMicroseconds(calcPWMValue(controlState.rightDrive));
 }
 
 void updateLift()
 {
-
+  
 }
 
 void setup() {
+  
+  leftDrive.attach(3);
+  rightDrive.attach(5);
+  
   Ethernet.begin(mac,ip);
   UDP.begin(8888);
   Serial.begin(9600);
-  pinMode(LIFT_LIMIT_UP, INPUT_PULLUP);
-  pinMode(LIFT_LIMIT_DOWN, INPUT_PULLUP);
+  //pinMode(LIFT_LIMIT_UP, INPUT_PULLUP);
+  //pinMode(LIFT_LIMIT_DOWN, INPUT_PULLUP);
 }
 
 
@@ -81,6 +91,6 @@ void setup() {
 void loop() {
   doCommunication();
   drivetrainUpdate();
-  updateLift();
+  //updateLift();
 }
 
