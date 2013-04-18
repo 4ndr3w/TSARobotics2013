@@ -6,8 +6,8 @@
 #include <Ethernet.h>
 #include <EthernetUdp.h>
 
-#define LIFT_LIMIT_DOWN 10
-#define LIFT_LIMIT_UP 11
+#define LIFT_LIMIT_DOWN A4
+#define LIFT_LIMIT_UP A5
 
 #define LIFT_RUN_UP 1
 #define LIFT_RUN_DOWN 2
@@ -16,9 +16,9 @@
 Servo leftDrive;
 Servo rightDrive;
 
-//Spike collector(6,7);
-//Spike lift(8,9);
-
+Spike collector(7,8);
+Spike lift(9,6);
+#define dbc(v,l) ( ( abs(v) > l ) ? v : 0 )
 
 byte mac[] = {  
   0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
@@ -38,6 +38,7 @@ struct ControlState
 
 int calcPWMValue(byte value)
 {
+  value = dbc(value, 5);
   float v = ((float)value*(500.0f/127.0f))+1000.0f;
   return int(floor(v));
 }
@@ -60,6 +61,7 @@ void doCommunication()
     controlState.leftDrive = 127;
     controlState.rightDrive = 127;
     controlState.collectorState = 0;
+    controlState.liftState = 0;
   }
 }
 
@@ -71,7 +73,17 @@ void drivetrainUpdate()
 
 void updateLift()
 {
-  
+  collector.set(controlState.collectorState);
+  if ( digitalRead(LIFT_LIMIT_UP) && controlState.liftState == 1 )
+  {
+    lift.set(REVERSE);
+  }
+  else if ( digitalRead(LIFT_LIMIT_DOWN) && controlState.liftState == 2 )
+  {
+    lift.set(FORWARD);
+  }
+  else
+    lift.set(OFF);
 }
 
 void setup() {
@@ -82,8 +94,8 @@ void setup() {
   Ethernet.begin(mac,ip);
   UDP.begin(8888);
   Serial.begin(9600);
-  //pinMode(LIFT_LIMIT_UP, INPUT_PULLUP);
-  //pinMode(LIFT_LIMIT_DOWN, INPUT_PULLUP);
+  pinMode(LIFT_LIMIT_UP, INPUT_PULLUP);
+  pinMode(LIFT_LIMIT_DOWN, INPUT_PULLUP);
 }
 
 
@@ -91,6 +103,6 @@ void setup() {
 void loop() {
   doCommunication();
   drivetrainUpdate();
-  //updateLift();
+  updateLift();
 }
 
